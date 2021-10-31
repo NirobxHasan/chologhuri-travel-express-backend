@@ -15,7 +15,6 @@ const client = new MongoClient(uri, { useNewUrlParser: true, useUnifiedTopology:
 async function run() {
     try {
       await client.connect();
-      console.log("database connected!");
       const database = client.db("Chologhuri-travel");
       const tourPackageCollection = database.collection("tour-package");
       const placedOrderCollecttion = database.collection("placeOrder")
@@ -25,6 +24,12 @@ async function run() {
         const cursor = tourPackageCollection.find({});
         const services = await cursor.toArray();
         res.send(services)
+      })
+      //POST Tour package
+      app.post('/services', async(req,res)=>{
+        const data = req.body;
+        const result = await tourPackageCollection.insertOne(data);
+        res.json(result);
       })
 
       //Post a order
@@ -39,10 +44,50 @@ async function run() {
           const id = req.params.id;
         
           const query = {_id:ObjectID(id)};
-          console.log(query);
+          console.log();
           const service = await tourPackageCollection.findOne(query);
           res.json(service);
 
+      })
+      //Get all Booking
+      app.get("/allbooking", async(req,res)=>{
+        const cursor = placedOrderCollecttion.find({});
+        const bookings = await cursor.toArray();
+        res.json(bookings);
+      })
+
+      //Get my oder
+      app.get("/mybooking/:email",async(req,res)=>{
+        const email = req.params.email;
+        const query = {Email:email}
+        const cursor = placedOrderCollecttion.find(query);
+        const booking = await cursor.toArray();
+        res.json(booking);
+      })
+      //Update Order Status
+
+      app.put('/mybooking/:id', async(req,res)=>{
+        const id = req.params.id;
+        const updateStatus = req.body;
+        console.log(id);
+        console.log(updateStatus);
+        const filter = {_id:ObjectID(id)}
+        const options = { upsert: true };
+        const updateDoc = {
+          $set: {
+            status: updateStatus.status
+          },
+        };
+        const result = await placedOrderCollecttion.updateOne(filter, updateDoc, options);
+        res.json(result) 
+      })
+
+
+      app.delete("/mybooking/:id", async(req,res)=>{
+        const id = req.params.id;
+        const query = { _id: ObjectID(id) };
+        const result = await placedOrderCollecttion.deleteOne(query);
+        res.json(result);
       })
       
     } finally {
