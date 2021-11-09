@@ -100,6 +100,9 @@ async function run() {
 app.get("/",(req,res)=>{
     res.send("I am from chologhuri!")
 })
+app.get("/testing",(req,res)=>{
+    res.send("testing thing")
+})
 
 app.listen(port,()=>{
     console.log("Litsening from port ",port);
