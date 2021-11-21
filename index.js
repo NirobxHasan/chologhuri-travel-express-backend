@@ -17,7 +17,8 @@ async function run() {
       await client.connect();
       const database = client.db("Chologhuri-travel");
       const tourPackageCollection = database.collection("tour-package");
-      const placedOrderCollecttion = database.collection("placeOrder")
+      const placedOrderCollecttion = database.collection("placeOrder");
+      const reviewsCollection = database.collection('reviews')
 
       //Get all package
       app.get("/services", async(req,res)=>{
@@ -88,6 +89,21 @@ async function run() {
         const query = { _id: ObjectID(id) };
         const result = await placedOrderCollecttion.deleteOne(query);
         res.json(result);
+      })
+
+      //reviews
+
+      app.post('/reviews', async(req,res)=>{
+        const review = req.body;
+        const result = await reviewsCollection.insertOne(review);
+        res.json(result);
+      })
+      
+      app.get('/reviews', async(req,res)=>{
+        const cursor = reviewsCollection.find({});
+        const reviews = await cursor.toArray();
+        res.json(reviews)
+
       })
       
     } finally {
