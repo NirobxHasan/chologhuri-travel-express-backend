@@ -23,8 +23,9 @@ async function run() {
       const database = client.db("Chologhuri-travel");
       const tourPackageCollection = database.collection("tour-package");
       const placedOrderCollecttion = database.collection("placeOrder");
-      const reviewsCollection = database.collection('reviews')
-      const blogsCollection = database.collection('blogs')
+      const reviewsCollection = database.collection('reviews');
+      const blogsCollection = database.collection('blogs');
+      const transportsCollection = database.collection('transports') ;
 
       //Get all package
       app.get("/services", async(req,res)=>{
@@ -145,7 +146,36 @@ async function run() {
        const query = {_id: ObjectID(id)}
        const blog = await blogsCollection.findOne(query)
        res.json(blog);
-     }) 
+     })
+     
+     //transport post
+     app.post("/transports", async(req,res)=>{
+       const data = req.body;
+       console.log(data);
+       const result = await transportsCollection.insertOne(data);
+       res.json(result);
+     })
+
+     //get trasnport 
+     app.get("/transports/:email", async(req,res)=>{
+       const email = req.params.email;
+       console.log(email);
+       const cursor = transportsCollection.find({userEmail
+        : email});
+       const bookedTransports = await  cursor.toArray();
+      
+       res.json(bookedTransports)
+     })
+
+     //Cancle Transport
+     app.delete("/transports/:id", async(req,res)=>{
+      const id = req.params.id;
+      const query = { _id: ObjectID(id) };
+      const result = await transportsCollection.deleteOne(query);
+      res.json(result);
+    })
+     
+
 
       
     } finally {
