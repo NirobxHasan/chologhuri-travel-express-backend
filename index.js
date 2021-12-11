@@ -26,6 +26,27 @@ async function run() {
       const reviewsCollection = database.collection('reviews');
       const blogsCollection = database.collection('blogs');
       const transportsCollection = database.collection('transports') ;
+      const usersCollection = database.collection('users');
+
+      //users
+      //create user profile
+      app.post('/users', async(req,res)=>{
+        const data = req.body;
+        const result = await usersCollection.insertOne(data);
+        res.json('result')
+      })
+
+       //check is admin or not
+       app.get('/users_admin/:email', async(req,res)=>{
+        const email = req.params.email;
+        const query = {email: email};
+        const user = await usersCollection.findOne(query)
+        let isAdmin = false;
+        if(user?.role === 'admin'){
+          isAdmin = true;
+        }
+        res.json({'admin': isAdmin});
+      })
 
       //Get all package
       app.get("/services", async(req,res)=>{
@@ -37,6 +58,14 @@ async function run() {
       app.post('/services', async(req,res)=>{
         const data = req.body;
         const result = await tourPackageCollection.insertOne(data);
+        res.json(result);
+      })
+
+      //Delete Tour Package
+      app.delete('/services/:id', async(req,res)=>{
+        const id = req.params.id;
+        const query = { _id: ObjectID(id) };
+        const result = await tourPackageCollection.deleteOne(query);
         res.json(result);
       })
 
@@ -63,6 +92,8 @@ async function run() {
         const bookings = await cursor.toArray();
         res.json(bookings);
       })
+
+      
 
       //Get my oder
       app.get("/mybooking/:email",async(req,res)=>{
@@ -155,8 +186,14 @@ async function run() {
        const result = await transportsCollection.insertOne(data);
        res.json(result);
      })
+     //GET ALL transports
+     app.get('/transports', async(req,res)=>{
+       const cursor = transportsCollection.find({});
+       const allTransports = await cursor.toArray();
+       res.json(allTransports); 
+     })
 
-     //get trasnport 
+     //get USER BOOKED trasnport 
      app.get("/transports/:email", async(req,res)=>{
        const email = req.params.email;
        console.log(email);
